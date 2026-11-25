@@ -8,6 +8,11 @@
 
 ## Архітектура проєкту
 
+![Архітектура проєкту](docs/images/architecture.svg)
+
+<details>
+<summary>Mermaid-схема</summary>
+
 ```mermaid
 flowchart TD
     Client["Клієнт · curl / Postman"] -->|"HTTP · 127.0.0.1:3000"| API
@@ -23,6 +28,8 @@ flowchart TD
     class API app
     class DB,Volume data
 ```
+
+</details>
 
 API обробляє HTTP-запити, а PostgreSQL зберігає завдання. Docker Compose створює внутрішню мережу, в якій API знаходить базу за назвою сервісу `db`. Порт PostgreSQL не публікується на хості.
 
@@ -52,6 +59,11 @@ API обробляє HTTP-запити, а PostgreSQL зберігає завд�
 
 ## Багатоетапна збірка (Multi-stage build)
 
+![Багатоетапна збірка](docs/images/multi-stage.svg)
+
+<details>
+<summary>Mermaid-схема</summary>
+
 ```mermaid
 flowchart LR
     subgraph Build["Етап 1 · Build"]
@@ -64,9 +76,16 @@ flowchart LR
     end
 ```
 
+</details>
+
 Компілятор TypeScript та інструменти розробки не потрапляють у фінальний образ. Це зменшує його розмір і поверхню атаки.
 
 ## Послідовність запуску та Healthcheck
+
+![Healthcheck](docs/images/healthcheck.svg)
+
+<details>
+<summary>Mermaid-схема</summary>
 
 ```mermaid
 flowchart TD
@@ -78,9 +97,16 @@ flowchart TD
     E --> F["GET /health · SELECT 1"]
 ```
 
+</details>
+
 У Compose задано `depends_on: condition: service_healthy`. Перевірка PostgreSQL має таймаут 3 секунди та 10 невдалих спроб до статусу unhealthy. Маршрут API `/health` окремо перевіряє можливість виконати SQL-запит.
 
 ## Постійне зберігання даних
+
+![Docker Volume](docs/images/volume.svg)
+
+<details>
+<summary>Mermaid-схема</summary>
 
 ```mermaid
 flowchart TD
@@ -93,6 +119,8 @@ flowchart TD
     class V data
 ```
 
+</details>
+
 Іменований том підключається до `/var/lib/postgresql/data`. Дані залишаються після звичайного видалення та повторного створення контейнера. Файл `init.sql` підключається лише для читання і виконується при першій ініціалізації порожньої бази.
 
 ## REST API
@@ -103,6 +131,11 @@ flowchart TD
 | GET | `/tasks` | Отримати список завдань | 200 |
 | POST | `/tasks` | Створити завдання | 201 |
 | PATCH | `/tasks/:id` | Оновити статус виконання | 200 |
+
+![Взаємодія API](docs/images/api-sequence.svg)
+
+<details>
+<summary>Mermaid-схема</summary>
 
 ```mermaid
 sequenceDiagram
@@ -120,9 +153,16 @@ sequenceDiagram
     A-->>C: HTTP 200 + JSON
 ```
 
+</details>
+
 Для роботи з базою використовується пул підключень `pg.Pool`. Параметризовані SQL-запити відокремлюють дані користувача від SQL-коду. Некоректні дані повертають 400, відсутнє завдання — 404, помилка бази — 500, а недоступність БД у health endpoint — 503.
 
 ## Модель даних
+
+![Структура бази даних](docs/images/database.svg)
+
+<details>
+<summary>Mermaid-схема</summary>
 
 ```mermaid
 erDiagram
@@ -133,6 +173,8 @@ erDiagram
         TIMESTAMPTZ created_at
     }
 ```
+
+</details>
 
 Поле `title` обмежене 200 символами; `completed` за замовчуванням має значення false, а `created_at` встановлюється автоматично.
 
