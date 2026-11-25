@@ -82,7 +82,6 @@ flowchart TD
     E --> F["GET /health · SELECT 1"]
 ```
 
-![Healthcheck](docs/images/healthcheck.svg)
 
 У Compose задано `depends_on: condition: service_healthy`. Перевірка PostgreSQL має таймаут 3 секунди та 10 невдалих спроб до статусу unhealthy. Маршрут API `/health` окремо перевіряє можливість виконати SQL-запит.
 
